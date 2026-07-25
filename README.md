@@ -79,7 +79,7 @@ docker run -d \
 ```yaml
 services:
   nudge:
-    image: ghcr.io/leo-cmp/nudge:latest
+      image: ghcr.io/leo-cmp/nudge:latest
     restart: unless-stopped
     ports:
       - "8080:8080"

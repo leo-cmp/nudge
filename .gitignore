@@ -1,5 +1,4 @@
 # Executables
-bin/
 *.exe
 *.exe~
 *.dll

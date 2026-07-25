@@ -21,25 +21,29 @@ func main() {
 
 	cfg := config.Load()
 
-	// Initialize Database
 	database, err := db.Init(cfg.DatabaseURL)
 	if err != nil {
 		log.Fatalf("[Fatal] Database initialization failed: %v", err)
 	}
 	defer database.Close()
-	log.Println("[Nudge] SQLite database connected and migrated successfully")
+	log.Printf("[Nudge] SQLite database connected (%s)", cfg.DatabaseURL)
 
-	// Initialize Telegram Notifier
 	notifier := telegram.NewNotifier(cfg.TelegramBotToken, cfg.TelegramDefaultChatID)
 
-	// Initialize and start Scheduler in background
 	sched := scheduler.NewScheduler(database, notifier)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
 	go sched.Start(ctx)
 
-	// Initialize MCP Server
+	if cfg.Transport == "stdio" {
+		mcpServer := mcp.NewServer(cfg, database, notifier)
+		if err := mcpServer.RunStdio(); err != nil {
+			log.Fatalf("[Fatal] MCP stdio stopped: %v", err)
+		}
+		return
+	}
+
 	mcpHandler := mcp.NewHandler(cfg, database, notifier)
 
 	httpServer := &http.Server{
@@ -47,7 +51,6 @@ func main() {
 		Handler: mcpHandler,
 	}
 
-	// Graceful shutdown listener
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 

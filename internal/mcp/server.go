@@ -21,12 +21,16 @@ type Server struct {
 	mu          sync.RWMutex
 }
 
-func NewHandler(cfg *config.Config, database *db.DB, notifier *telegram.Notifier) http.Handler {
-	s := &Server{
+func NewServer(cfg *config.Config, database *db.DB, notifier *telegram.Notifier) *Server {
+	return &Server{
 		cfg:         cfg,
 		toolHandler: NewToolHandler(database, notifier),
 		sessions:    make(map[string]chan []byte),
 	}
+}
+
+func NewHandler(cfg *config.Config, database *db.DB, notifier *telegram.Notifier) http.Handler {
+	s := NewServer(cfg, database, notifier)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
