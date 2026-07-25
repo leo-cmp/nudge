@@ -21,23 +21,18 @@ type Server struct {
 	mu          sync.RWMutex
 }
 
-func NewServer(cfg *config.Config, database *db.DB, notifier *telegram.Notifier) *Server {
-	return &Server{
+func NewHandler(cfg *config.Config, database *db.DB, notifier *telegram.Notifier) http.Handler {
+	s := &Server{
 		cfg:         cfg,
 		toolHandler: NewToolHandler(database, notifier),
 		sessions:    make(map[string]chan []byte),
 	}
-}
 
-func (s *Server) ListenAndServe() error {
 	mux := http.NewServeMux()
-
 	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("GET /sse", s.authMiddleware(s.handleSSE))
 	mux.HandleFunc("POST /messages", s.authMiddleware(s.handleMessages))
-
-	log.Printf("[MCP Server] Listening on port %s...\n", s.cfg.Port)
-	return http.ListenAndServe(":"+s.cfg.Port, mux)
+	return mux
 }
 
 func (s *Server) authMiddleware(next http.HandlerFunc) http.HandlerFunc {
