@@ -1,13 +1,12 @@
 {
-  "name": "nudge-mcp",
+  "name": "@leo-cmp/nudge-mcp",
   "version": "1.0.0",
   "description": "MCP server for Telegram reminders — create and schedule reminders from your AI agent",
   "type": "module",
-  "bin": {
-    "nudge-mcp": "./bin/cli.js"
-  },
+  "bin": "./bin/cli.js",
   "files": [
-    "bin/cli.js"
+    "bin/",
+    "README.md"
   ],
   "repository": {
     "type": "git",
