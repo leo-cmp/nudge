@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"log"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
@@ -39,14 +40,20 @@ func main() {
 	go sched.Start(ctx)
 
 	// Initialize MCP Server
-	mcpServer := mcp.NewServer(cfg, database, notifier)
+	mcpHandler := mcp.NewHandler(cfg, database, notifier)
+
+	httpServer := &http.Server{
+		Addr:    ":" + cfg.Port,
+		Handler: mcpHandler,
+	}
 
 	// Graceful shutdown listener
 	stop := make(chan os.Signal, 1)
 	signal.Notify(stop, os.Interrupt, syscall.SIGTERM)
 
 	go func() {
-		if err := mcpServer.ListenAndServe(); err != nil {
+		log.Printf("[Nudge] MCP Server listening on port %s\n", cfg.Port)
+		if err := httpServer.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("[Fatal] MCP Server stopped with error: %v", err)
 		}
 	}()
@@ -57,6 +64,13 @@ func main() {
 	log.Println("[Nudge] Shutting down gracefully...")
 
 	cancel()
-	time.Sleep(500 * time.Millisecond)
+
+	shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer shutdownCancel()
+
+	if err := httpServer.Shutdown(shutdownCtx); err != nil {
+		log.Printf("[Nudge] HTTP server forced to shutdown: %v", err)
+	}
+
 	log.Println("[Nudge] Shutdown complete.")
 }

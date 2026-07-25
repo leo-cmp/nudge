@@ -5,6 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"strings"
 	"time"
 )
 
@@ -43,12 +44,12 @@ func (n *Notifier) SendToChat(chatID, message string) error {
 	}
 
 	url := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage", n.botToken)
-	formattedText := fmt.Sprintf("🔔 *Nudge Lembrete*\n\n%s", message)
+	formattedText := fmt.Sprintf("🔔 *Nudge Lembrete*\n\n%s", escapeMarkdownV2(message))
 
 	payload := sendMessagePayload{
 		ChatID:    chatID,
 		Text:      formattedText,
-		ParseMode: "Markdown",
+		ParseMode: "MarkdownV2",
 	}
 
 	body, err := json.Marshal(payload)
@@ -67,4 +68,28 @@ func (n *Notifier) SendToChat(chatID, message string) error {
 	}
 
 	return nil
+}
+
+func escapeMarkdownV2(s string) string {
+	replacer := strings.NewReplacer(
+		"_", "\\_",
+		"*", "\\*",
+		"[", "\\[",
+		"]", "\\]",
+		"(", "\\(",
+		")", "\\)",
+		"~", "\\~",
+		"`", "\\`",
+		">", "\\>",
+		"#", "\\#",
+		"+", "\\+",
+		"-", "\\-",
+		"=", "\\=",
+		"|", "\\|",
+		"{", "\\{",
+		"}", "\\}",
+		".", "\\.",
+		"!", "\\!",
+	)
+	return replacer.Replace(s)
 }
