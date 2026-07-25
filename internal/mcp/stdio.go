@@ -35,9 +35,6 @@ func (s *Server) RunStdio() error {
 				continue
 			}
 			fmt.Fprintln(os.Stdout, string(data))
-			if f, ok := os.Stdout.(interface{ Sync() error }); ok {
-				_ = f.Sync()
-			}
 		}
 	}
 
