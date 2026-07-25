@@ -1,0 +1,11 @@
+*.go
+cmd/
+internal/
+docs/
+.github/
+Dockerfile
+docker-compose.yml
+go.mod
+go.sum
+.gitignore
+*.db
