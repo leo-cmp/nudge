@@ -35,3 +35,17 @@ jobs:
             nudge-linux-arm64
             nudge-darwin-amd64
             nudge-darwin-arm64
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish to npm
+        run: |
+          VER="${GITHUB_REF#refs/tags/v}"
+          npm pkg set version="$VER"
+          npm publish --access public
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
