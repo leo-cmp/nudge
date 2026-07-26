@@ -4,6 +4,19 @@ Servidor MCP que cria lembretes via Telegram. Seu agente de IA agenda notificaç
 
 ## Instalação
 
+### Claude Code
+
+```bash
+claude mcp add --scope user nudge \
+  -e TELEGRAM_BOT_TOKEN=123:abc \
+  -e TELEGRAM_DEFAULT_CHAT_ID=123456789 \
+  -- npx -y @leo-cmp/nudge-mcp
+```
+
+### OpenCode
+
+Adicione em `~/.config/opencode/settings.json`:
+
 ```json
 {
   "mcpServers": {
